@@ -44,6 +44,12 @@ class Mixer:
     def text_off(self, id, fade=0.5):
         return self._call("/text_off", {"id": id, "fade": fade})
 
+    def image_on(self, src, id="poster", fade=1.5, bottom=170, dim=150):
+        return self._call("/image_on", {"id": id, "src": src, "fade": fade, "bottom": bottom, "dim": dim})
+
+    def image_off(self, id="poster", fade=1.5):
+        return self._call("/image_off", {"id": id, "fade": fade})
+
     def poster(self, src, seconds=5, fade=1.5, text=None):
         return self._call("/poster", {"src": src, "seconds": seconds, "fade": fade, "text": text})
 

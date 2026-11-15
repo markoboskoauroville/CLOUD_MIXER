@@ -68,6 +68,27 @@ def sleep_until(t):
         time.sleep(min(d, 0.5) if d > 0.02 else d)
 
 
+def poster_cycle(m, spec, t0, state):
+    """Poster as an OVERLAY over the running picture (15.11.2026): first after spec.first s, then every spec.every s, shown
+    spec.seconds with spec.fade fade in/out. The program and its sound run on untouched."""
+    first, every = float(spec.get("first", 60)), float(spec.get("every", 120))
+    secs, fade = float(spec.get("seconds", 20)), float(spec.get("fade", 1.5))
+    n = 0
+    while not state["done"]:
+        sleep_until(t0 + first + n * every)
+        if state["done"]:
+            break
+        try:
+            m.image_on(spec["src"], fade=fade, bottom=spec.get("bottom", 170))
+            say(f"POSTER overlay on (#{n + 1}) for {secs}s")
+            sleep_until(time.time() + secs)
+            m.image_off(fade=fade)
+            say(f"POSTER overlay off (#{n + 1})")
+        except Exception as e:
+            say(f"poster overlay failed {e}")
+        n += 1
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("show")
@@ -142,6 +163,10 @@ def main():
     r = m.playlist(items, transition=show.get("transition", "fade"), fade=show.get("fade", 1.5),
                    end_fade=show.get("end_fade", 3.0), first_fade=show.get("first_fade", 1.0))
     say(f"PLAYLIST STARTED {r}")
+    state = {"done": False}
+    if show.get("poster_overlay"):
+        import threading
+        threading.Thread(target=poster_cycle, args=(m, show["poster_overlay"], time.time(), state), daemon=True).start()
     while True:
         time.sleep(15)
         try:
@@ -153,6 +178,8 @@ def main():
         say(f"item {pl.get('index', -1) + 1}/{pl.get('count')} {pl.get('current')} | prog {st['program']['id']} "
             f"{st['program']['pos_s']}s | out {'on' if out else 'off'} frames={out and out['frames']} late={st['late_frames']} "
             f"holds={st['holds']}")
+        if pl.get("done"):
+            state["done"] = True
         if out is None and pl.get("done"):
             say("show finished, output stopped")
             break

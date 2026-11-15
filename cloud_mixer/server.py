@@ -9,6 +9,8 @@ POST /cut         {"id"}
 POST /fade        {"id", "seconds": 1.5}
 POST /text_on     {"id", "text", "position": "bottom|top|center|bottom-left|…", "style"?: {size,color,box,margin}}
 POST /text_off    {"id"}
+POST /image_on    {"id"?: "poster", "src": "/path.jpg", "fade": 1.5}  an image card OVER the program, sound untouched
+POST /image_off   {"id"?: "poster", "fade": 1.5}
 POST /poster      {"src": "/path.jpg", "seconds": 5, "fade": 1.5, "text"?: {...}}  (shows it, then fades back)
 POST /playlist    {"items": [...], "transition": "fade|cut", "fade": 1.5, "end": "black", "site"?: true}
 POST /output      {"url": "srt://…" | "relay" | "relay:<path>" | "/tmp/x.ts"}   /output/stop
@@ -29,6 +31,8 @@ from .engine import FPS, Mixer, Playlist
 
 log = logging.getLogger("cloud_mixer")
 RELAY_KEY = "/etc/santoshi-relay/key"
+# 15.11.2026 "mixer only": MediaMTX lets only user "mixer" (127.0.0.1) publish on santoshi; cameras (user santoshi) only on cam-*
+MIXER_KEY = "/etc/santoshi-relay/mixer-key"
 SITE = "https://santoshi-band.pages.dev/api/live"
 SITE_TOKEN = os.path.expanduser("~/.config/cloud-mixer/site-camera-token")
 MX: Mixer = None  # type: ignore
@@ -36,8 +40,9 @@ STATE = {"site_live_by_us": False}
 
 
 def relay_url(path="santoshi", port=8890):
-    key = open(RELAY_KEY).read().strip()
-    return (f"srt://127.0.0.1:{port}?streamid=publish:{path}:santoshi:{key}&pkt_size=1316&latency=400000"
+    user, keyfile = ("mixer", MIXER_KEY) if path == "santoshi" and os.path.exists(MIXER_KEY) else ("santoshi", RELAY_KEY)
+    key = open(keyfile).read().strip()
+    return (f"srt://127.0.0.1:{port}?streamid=publish:{path}:{user}:{key}&pkt_size=1316&latency=400000"
             f"&transtype=live")
 
 
@@ -130,6 +135,12 @@ class H(BaseHTTPRequestHandler):
         if p == "/text_on":
             MX.text_on(b["id"], b["text"], b.get("position", "bottom"), b.get("style"), b.get("fade", 0.5))
             return {"ok": True}
+        if p == "/image_on":
+            MX.image_on(b.get("id", "poster"), b["src"], float(b.get("fade", 1.5)), int(b.get("bottom", 170)),
+                        int(b.get("dim", 150)))
+            return {"ok": True}
+        if p == "/image_off":
+            return {"ok": MX.text_off(b.get("id", "poster"), float(b.get("fade", 1.5)))}
         if p == "/text_off":
             return {"ok": MX.text_off(b["id"], b.get("fade", 0.5))}
         if p == "/poster":

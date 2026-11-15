@@ -358,6 +358,22 @@ class Overlay:
         alc = al.reshape(bh // 2, 2, bw // 2, 2).mean(axis=(1, 3))
         self.planes = (yp.astype(np.float32), up.astype(np.float32), vp.astype(np.float32), al, alc)
 
+    def render_image(self, path: str, bottom: int = 170, dim: int = 150):
+        """An image card over the program (15.11.2026): a dark translucent backdrop over the whole frame and the picture
+        whole (contain), centred above `bottom` pixels kept free for the lower-third text. Audio is never touched."""
+        im = Image.open(path).convert("RGBA")
+        top = 24
+        sc = min((W - 96) / im.width, (H - bottom - top) / im.height)
+        fg = im.resize((max(2, int(im.width * sc)), max(2, int(im.height * sc))), Image.LANCZOS)
+        img = Image.new("RGBA", (W, H), (0, 0, 0, dim))
+        img.alpha_composite(fg, ((W - fg.width) // 2, top + (H - bottom - top - fg.height) // 2))
+        a = np.asarray(img).astype(np.float32)
+        yp, up, vp = rgb_to_yuv420(a[..., :3].astype(np.uint8))
+        al = a[..., 3] / 255.0
+        alc = al.reshape(H // 2, 2, W // 2, 2).mean(axis=(1, 3))
+        self.x = self.y = 0
+        self.planes = (yp.astype(np.float32), up.astype(np.float32), vp.astype(np.float32), al, alc)
+
     def tick(self):
         if self.alpha < self.target:
             self.alpha = min(self.target, self.alpha + self.step)
@@ -554,6 +570,18 @@ class Mixer:
                 self.dying.append(old)
             self.overlays[oid] = ov
             self.event(f"text_on {oid}: {text!r} @ {position}")
+
+    def image_on(self, oid, path, fade=1.5, bottom=170, dim=150):
+        """Image overlay (poster card) with fade in; the program's sound is not touched. Same id again = replaced."""
+        ov = Overlay(oid, path, "center", step=1.0 / max(1, fade * FPS))
+        ov.render_image(path, bottom, dim)
+        with self.lock:
+            old = self.overlays.get(oid)
+            if old:
+                old.target = 0.0
+                self.dying.append(old)
+            self.overlays[oid] = ov
+            self.event(f"image_on {oid}: {os.path.basename(path)}")
 
     def text_off(self, oid, fade=0.5):
         with self.lock:

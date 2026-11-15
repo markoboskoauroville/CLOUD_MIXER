@@ -1,0 +1,96 @@
+{
+ "title": "Šubić 17.10.2026, replay 2 (poster as overlay, sound continuous)",
+ "fade": 1.5,
+ "end_fade": 3.0,
+ "first_fade": 1.0,
+ "items": [
+  {
+   "src": "/srv/cloud-mixer/media/subic/01.mp4",
+   "title": "1. Jai Ganesha Pahi Mam",
+   "start": 0,
+   "seconds": null,
+   "text": {
+    "id": "lower",
+    "text": "This is a test stream\nRecording of the concert of 17.10.2026 · Češki narodni dom, Zagreb · 1. Jai Ganesha Pahi Mam"
+   }
+  },
+  {
+   "src": "/srv/cloud-mixer/media/subic/02.mp4",
+   "title": "2. Ambe Jagadambe",
+   "start": 0,
+   "seconds": null,
+   "text": {
+    "id": "lower",
+    "text": "This is a test stream\nRecording of the concert of 17.10.2026 · Češki narodni dom, Zagreb · 2. Ambe Jagadambe"
+   }
+  },
+  {
+   "src": "/srv/cloud-mixer/media/subic/03.mp4",
+   "title": "3. Kali Kali Maha Maya",
+   "start": 0,
+   "seconds": null,
+   "text": {
+    "id": "lower",
+    "text": "This is a test stream\nRecording of the concert of 17.10.2026 · Češki narodni dom, Zagreb · 3. Kali Kali Maha Maya"
+   }
+  },
+  {
+   "src": "/srv/cloud-mixer/media/subic/04.mp4",
+   "title": "4. Sarasvati Maha Lakshmi",
+   "start": 0,
+   "seconds": null,
+   "text": {
+    "id": "lower",
+    "text": "This is a test stream\nRecording of the concert of 17.10.2026 · Češki narodni dom, Zagreb · 4. Sarasvati Maha Lakshmi"
+   }
+  },
+  {
+   "src": "/srv/cloud-mixer/media/subic/05.mp4",
+   "title": "5. Kailasha Vasa Maha Deva",
+   "start": 0,
+   "seconds": null,
+   "text": {
+    "id": "lower",
+    "text": "This is a test stream\nRecording of the concert of 17.10.2026 · Češki narodni dom, Zagreb · 5. Kailasha Vasa Maha Deva"
+   }
+  },
+  {
+   "src": "/srv/cloud-mixer/media/subic/06.mp4",
+   "title": "6. Uma Parvati Ananda Ma",
+   "start": 0,
+   "seconds": null,
+   "text": {
+    "id": "lower",
+    "text": "This is a test stream\nRecording of the concert of 17.10.2026 · Češki narodni dom, Zagreb · 6. Uma Parvati Ananda Ma"
+   }
+  },
+  {
+   "src": "/srv/cloud-mixer/media/subic/07.mp4",
+   "title": "7. Rama Rama Jaya Raja Ram",
+   "start": 0,
+   "seconds": null,
+   "text": {
+    "id": "lower",
+    "text": "This is a test stream\nRecording of the concert of 17.10.2026 · Češki narodni dom, Zagreb · 7. Rama Rama Jaya Raja Ram"
+   }
+  },
+  {
+   "src": "/srv/cloud-mixer/media/subic/08.mp4",
+   "title": "8. Asatoma Sadgamaya",
+   "start": 0,
+   "seconds": null,
+   "text": {
+    "id": "lower",
+    "text": "This is a test stream\nRecording of the concert of 17.10.2026 · Češki narodni dom, Zagreb · 8. Asatoma Sadgamaya"
+   }
+  }
+ ],
+ "poster_overlay": {
+  "src": "/srv/cloud-mixer/media/subic/poster-next-2026-11-21.jpg",
+  "first": 60,
+  "every": 120,
+  "seconds": 20,
+  "fade": 1.5,
+  "bottom": 170
+ }
+}
