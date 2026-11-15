@@ -153,7 +153,7 @@ class Auto:
 
     def ensure_fallback(self):
         if not self.fallback_loaded:
-            self.m.load(self.a.fallback, id="fallback")
+            self.m.load(self.a.fallback, id="fallback", bottom=self.a.fallback_bottom)   # room under the poster for the text
             self.fallback_loaded = True
 
     def go_on_air(self, st):
@@ -320,6 +320,7 @@ def main():
     ap.add_argument("--force-live", action="store_true", help="tests: behave as if the site were live")
     ap.add_argument("--fallback", default=os.environ.get("CLOUD_MIXER_FALLBACK", FALLBACK))
     ap.add_argument("--no-fallback-text", dest="fallback_text", action="store_false")
+    ap.add_argument("--fallback-bottom", type=int, default=110, help="pixels kept free under the fallback picture")
     ap.add_argument("--fade", type=float, default=1.0)
     ap.add_argument("--grace", type=float, default=15.0, help="seconds off-air conditions must hold before the encoder stops")
     ap.add_argument("--cam-gone", type=float, default=3.0)
