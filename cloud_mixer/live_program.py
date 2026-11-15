@@ -14,7 +14,7 @@
     no output yet: the fallback still (silence) with "Starting soon", then the encoder on santoshi.
     a camera path ready -> load it (SRT read), fade to it (1 s) when its picture arrives; the newest camera wins.
     the camera gone (path not ready 3 s) -> fade back to the fallback ("Back in a moment").
-  - neither (site stopped, no camera, 15 s grace) -> fade to black, encoder off: nothing on santoshi at all.
+  - neither (site stopped, no camera, 30 s grace, the fallback on air) -> fade to black, encoder off: nothing on santoshi at all.
 Why no 24/7 output: a permanent encoder costs ~30 % of a core of the 2-core VM and records "starting soon" to Drive all
 day; off-air the site shows /live/closed/ anyway, so there is nothing to watch.
 """
@@ -244,6 +244,14 @@ class Auto:
                 self.manual = True
                 return
         self.manual = False
+        # a camera that left its path goes to the fallback after cam_gone seconds, on air or about to go off air
+        ready = [c for _, c in cams]
+        if self.cam and self.cam not in ready:
+            self.cam_gone_since = self.cam_gone_since or now
+            if now - self.cam_gone_since >= a.cam_gone:
+                self.drop_camera("left its path")
+            if want:
+                return
         if not want:
             if self.started_output:
                 self.idle_since = self.idle_since or now
@@ -262,11 +270,6 @@ class Auto:
             if not self.go_on_air(st):
                 return
         # the camera
-        if self.cam and self.cam not in [c for _, c in cams]:
-            self.cam_gone_since = self.cam_gone_since or now
-            if now - self.cam_gone_since >= a.cam_gone:
-                self.drop_camera("left its path")
-            return
         self.cam_gone_since = None
         if newest and newest != self.cam:
             if self.cam:
@@ -322,7 +325,7 @@ def main():
     ap.add_argument("--no-fallback-text", dest="fallback_text", action="store_false")
     ap.add_argument("--fallback-bottom", type=int, default=110, help="pixels kept free under the fallback picture")
     ap.add_argument("--fade", type=float, default=1.0)
-    ap.add_argument("--grace", type=float, default=15.0, help="seconds off-air conditions must hold before the encoder stops")
+    ap.add_argument("--grace", type=float, default=30.0, help="seconds off-air conditions must hold before the encoder stops")
     ap.add_argument("--cam-gone", type=float, default=3.0)
     ap.add_argument("--min-queue", type=int, default=12, help="frames queued before the fade to a camera")
     ap.add_argument("--site-every-on", type=float, default=5.0)
