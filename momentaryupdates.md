@@ -8,3 +8,9 @@
 
 ## 15.11.2026, Marko (voice, dictated), stream audio to AAC
 "Switch the stream audio to double AC." (he means AAC). Reason: viewers on santoshi-band.pages.dev now play HLS only (hls.js or Safari's own player), and iPhone Safari may not play Opus.
+
+## 15.11.2026, Marko (his answer to the question "who publishes on the public path santoshi?"), the mixer-only live route
+"Yes, mixer only (Recommended)". Meaning, as approved: the CLOUD MIXER becomes the ONLY publisher on relay path `santoshi`, so HLS
+viewers always get AAC audio (iPhones). A camera that goes live gets its own private path (`cam-<id>`) from /api/live, the mixer
+switches to it with a short fade, shows a fallback picture with silence while no camera is there, and a scheduled show keeps
+precedence. Deadline: well before the concert of 21.11.2026.
