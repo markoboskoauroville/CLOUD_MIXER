@@ -15,8 +15,8 @@
    a second MediaMTX bound to 127.0.0.1 (SRT :8990) and never edit the live relay's config during a live stream.
 7. **ffmpeg reading SRT took ~35 s to connect** in the first dry run, so the capture missed the start; record on the
    MediaMTX side instead (`record: true`, `recordFormat: mpegts`) and analyse that file.
-8. **WebRTC viewers**: constrained baseline H.264, no B-frames, Opus 48 kHz (the WHEP player then has sound); LL-HLS from
-   the same path carries H.264 + Opus in fMP4.
+8. **WebRTC viewers**: constrained baseline H.264, no B-frames, AAC 48 kHz (since 15.11.2026: HLS viewers need AAC, iPhone Safari may not play Opus); LL-HLS from
+   the same path carries H.264 + AAC in fMP4.
 9. **YouTube blocks the VM's IP** without cookies (yt-dlp 2026.10.26: "Sign in to confirm you're not a bot"). Concert videos
    come from the Mac's local copies (re-encoded small) or Drive, never with Marko's cookies unless he says so.
 10. **`pkill -f <pattern>` over ssh kills its own shell** (exit 255). Use pid files or `pgrep -x`.
@@ -33,3 +33,10 @@
 15. **Live inputs need a supervisor**: a phone reconnect ends the SRT reader; the input reopens itself after 2 s.
 16. **Tests beside a live program**: a second daemon on another port (8851, nice 10, ultrafast, stills only) and the private
     MediaMTX; the live mixer stayed at 0 late frames, 0 holds.
+
+## 15.11.2026: stream audio for HLS viewers is AAC (rule)
+- The encoder (engine.py Output) now writes `-c:a aac -b:a 160k -ar 48000 -ac 2` instead of libopus (Marko: "Switch the stream audio to double AC"). Opus in HLS may not play on iPhone Safari.
+- MPEG-TS over SRT carries AAC; MediaMTX's HLS (lowLatency, fMP4) muxer accepts H.264 + AAC. Nothing else in the mixer code assumes Opus (grep found only engine.py).
+- Deploy waits for an idle mixer: restart only when cloud-mixer-show, meditation-room-linux and mrlinux-live are inactive and /status output is None. Never restart during a show.
+- Cameras publishing WHIP straight to relay path `santoshi` (no KV relay:campath) deliver WebRTC Opus; MediaMTX cannot transcode, so those HLS viewers get Opus. Route cameras through the mixer (campath + live_program) so the public path is always the mixer's AAC.
+- studio-ladder (/usr/local/lib/chromium-vm/studio-ladder) already encodes `-c:a aac -ar 48000`.

@@ -10,7 +10,7 @@ Future plan (his words): several cameras registered on the web page, a robot dir
   yuv420p 1280x720 25 fps + PCM 48 kHz stereo; every 40 ms Python takes one frame of each input on air, mixes
   (CROSSFADE = weighted sum of picture and equal-power sum of sound, CUT = swap), draws the live text overlays (PIL text
   converted to YUV once, blended per frame; 0.5 s fades) and writes to ONE encoder that never restarts
-  (libx264 constrained baseline, no B-frames, GOP 2 s, 3.5 Mbit/s + Opus 128k, MPEG-TS over SRT to 127.0.0.1:8890).
+  (libx264 constrained baseline, no B-frames, GOP 2 s, 3.5 Mbit/s + AAC 160k, MPEG-TS over SRT to 127.0.0.1:8890).
 - `cloud_mixer/server.py`: daemon + JSON API on 127.0.0.1:8841 and 100.102.86.30:8841 (Tailscale only).
 - `cloud_mixer/client.py`: Python client (`from cloud_mixer.client import Mixer`). `bin/cloudmix`: the same from the shell.
 - `cloud_mixer/show.py`: runs a show file at an exact UTC second (path check, encoder on black at T-8 s, site go at T-5 s,
@@ -84,3 +84,6 @@ Marko: "until 12:00, this will be a test stream. My live camera and my keyboard 
   own encoder on air, at 11:59:30 Croatian time fades text and camera to black (2 s), at 11:59:35 unloads the camera, keeps
   the same encoder (no reconnect), at 11:59:55 site go (no-op), at 12:00:00 the playlist. The Pixel stays on `pixel`,
   harmless; stop it in the app when convenient.
+
+## Audio codec rule (15.11.2026)
+Stream audio for HLS viewers is AAC (160k, 48 kHz stereo), set in engine.py Output. Code pushed; deploy to the VM (git pull in ~/cloud-mixer, restart cloud-mixer.service) only when no show is on air. Verify with a private relay path (relay:aactest) and ffprobe on 127.0.0.1:8888/aactest/index.m3u8 (needs aac + h264).

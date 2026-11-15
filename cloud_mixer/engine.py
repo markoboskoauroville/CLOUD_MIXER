@@ -6,7 +6,7 @@ Design (15.11.2026): Python is the mixer, ffmpeg does the codecs.
   small queue, so a loaded input is pre-rolled and ready before it goes on air.
 - Every 40 ms the mixer takes ONE video frame and ONE audio frame from the program input (and from the next input while a
   transition runs), mixes them with numpy (CROSSFADE = weighted sum of video and of audio; CUT = swap), draws the live text
-  overlays over the result, and writes it to ONE long-running encoder (libx264 no B-frames + Opus, MPEG-TS over SRT to
+  overlays over the result, and writes it to ONE long-running encoder (libx264 no B-frames + AAC, MPEG-TS over SRT to
   MediaMTX). The encoder never restarts, so there is never a gap at a transition.
 - An input that is not on program is not read, so a file input pauses where it is (vMix "auto pause"); a live input later
   (srt/rtsp/hls from the relay paths) is read by its own threads and keeps only the newest frames (live=True).
@@ -381,9 +381,9 @@ class Overlay:
 
 # ---------------------------------------------------------------- output
 class Output:
-    """One encoder for the whole show: raw yuv420p on stdin, PCM on fd 3, H.264 (no B-frames) + Opus, MPEG-TS."""
+    """One encoder for the whole show: raw yuv420p on stdin, PCM on fd 3, H.264 (no B-frames) + AAC, MPEG-TS."""
 
-    def __init__(self, url: str, vbitrate="3500k", abitrate="128k", preset="veryfast", extra_out=None):
+    def __init__(self, url: str, vbitrate="3500k", abitrate="160k", preset="veryfast", extra_out=None):
         self.url = url
         r, w = os.pipe()
         if url.startswith("srt://"):
@@ -400,7 +400,7 @@ class Output:
                "-g", str(FPS * 2), "-keyint_min", str(FPS * 2), "-sc_threshold", "0",
                "-b:v", vbitrate, "-maxrate", vbitrate, "-bufsize", vbitrate, "-pix_fmt", "yuv420p",
                "-colorspace", "bt709", "-color_primaries", "bt709", "-color_trc", "bt709", "-color_range", "tv",
-               "-c:a", "libopus", "-b:a", abitrate, "-ar", str(SR), "-ac", "2",
+               "-c:a", "aac", "-b:a", abitrate, "-ar", str(SR), "-ac", "2",
                "-flush_packets", "1", *fmt, url]
         self.proc = subprocess.Popen(cmd, stdin=subprocess.PIPE, stderr=subprocess.PIPE, pass_fds=(r,), bufsize=0)
         os.close(r)

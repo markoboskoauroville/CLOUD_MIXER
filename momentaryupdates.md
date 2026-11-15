@@ -5,3 +5,6 @@
 
 ## 15.11.2026 ~06:10, Marko (voice), the stream until noon
 "until 12:00, this will be a test stream. My live camera and my keyboard and message over the image. It says, 'This is a test of live streaming system on Santoshy page.' The music starts exactly at noon, Croatian Time."
+
+## 15.11.2026, Marko (voice, dictated), stream audio to AAC
+"Switch the stream audio to double AC." (he means AAC). Reason: viewers on santoshi-band.pages.dev now play HLS only (hls.js or Safari's own player), and iPhone Safari may not play Opus.
