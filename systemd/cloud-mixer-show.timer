@@ -1,0 +1,12 @@
+[Unit]
+Description=CLOUD MIXER show timer (the noon test stream, 15.11.2026 12:00 Croatian time = 11:00 UTC)
+
+[Timer]
+# starts 3 minutes early: the show runner itself waits to the exact second (AT in /etc/cloud-mixer/show.env)
+OnCalendar=2026-11-15 10:57:00 UTC
+AccuracySec=1s
+Persistent=false
+Unit=cloud-mixer-show.service
+
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,17 @@
+[Unit]
+Description=CLOUD MIXER show at an exact time (settings in /etc/cloud-mixer/show.env)
+After=network-online.target santoshi-relay.service
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/home/ubuntu/cloud-mixer
+EnvironmentFile=/etc/cloud-mixer/show.env
+Environment=PYTHONUNBUFFERED=1
+# a fresh mixer for the show (root for this one line only)
+ExecStartPre=+/bin/systemctl restart cloud-mixer.service
+ExecStart=/bin/sh -c 'exec /usr/bin/python3 -m cloud_mixer.show "$SHOW" --at "$AT" --path "$RELAY_PATH" $FLAGS'
+Restart=no
+
+[Install]
+WantedBy=multi-user.target

@@ -17,7 +17,7 @@ def song(i, start=0, seconds=None):
 
 def poster(seconds):
     return {"src": f"{D}/poster-next-2026-11-21.jpg", "title": "poster 21.11.2026", "seconds": seconds,
-            "bottom": 130, "text": {"id": "lower", "text": NEXT}}
+            "bottom": 150, "text": {"id": "lower", "text": NEXT}}
 
 
 def show(songs, end_seconds):

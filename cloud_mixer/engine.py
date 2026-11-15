@@ -369,7 +369,7 @@ class Output:
                "-f", "rawvideo", "-pix_fmt", "yuv420p", "-s", f"{W}x{H}", "-r", str(FPS), "-i", "pipe:0",
                "-f", "s16le", "-ar", str(SR), "-ac", "2", "-i", f"pipe:{r}",
                "-map", "0:v", "-map", "1:a",
-               "-c:v", "libx264", "-preset", preset, "-tune", "zerolatency", "-profile:v", "high", "-bf", "0",
+               "-c:v", "libx264", "-preset", preset, "-tune", "zerolatency", "-profile:v", "baseline", "-bf", "0",
                "-g", str(FPS * 2), "-keyint_min", str(FPS * 2), "-sc_threshold", "0",
                "-b:v", vbitrate, "-maxrate", vbitrate, "-bufsize", vbitrate, "-pix_fmt", "yuv420p",
                "-colorspace", "bt709", "-color_primaries", "bt709", "-color_trc", "bt709", "-color_range", "tv",
