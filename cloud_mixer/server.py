@@ -118,7 +118,8 @@ class H(BaseHTTPRequestHandler):
 
     def route(self, p, b):
         if p == "/load":
-            return {"id": MX.load(b["src"], b.get("id"), b.get("start", 0), b.get("seconds"), b.get("live", False))}
+            return {"id": MX.load(b["src"], b.get("id"), b.get("start", 0), b.get("seconds"), b.get("live", False),
+                                  int(b.get("bottom", 0)))}
         if p == "/unload":
             return {"ok": MX.unload(b["id"])}
         if p == "/cut":

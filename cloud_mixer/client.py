@@ -25,8 +25,9 @@ class Mixer:
     def status(self):
         return self._call("/status")
 
-    def load(self, src, id=None, start=0, seconds=None, live=False):
-        return self._call("/load", {"src": src, "id": id, "start": start, "seconds": seconds, "live": live})["id"]
+    def load(self, src, id=None, start=0, seconds=None, live=False, bottom=0):
+        return self._call("/load", {"src": src, "id": id, "start": start, "seconds": seconds, "live": live,
+                                    "bottom": bottom})["id"]
 
     def unload(self, id):
         return self._call("/unload", {"id": id})

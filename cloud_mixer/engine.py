@@ -68,8 +68,9 @@ def black_frame() -> bytes:
 BLACK = black_frame()
 
 
-def fit_picture(path: str) -> np.ndarray:
-    """A still (poster) on a 16:9 frame: the picture whole, centred, on a blurred, darkened enlargement of itself."""
+def fit_picture(path: str, bottom: int = 0) -> np.ndarray:
+    """A still (poster) on a 16:9 frame: the picture whole, centred, on a blurred, darkened enlargement of itself.
+    bottom > 0 keeps that many pixels free at the bottom (room for a lower-third text that must not cover the poster)."""
     im = Image.open(path).convert("RGB")
     bg = im.copy()
     s = max(W / bg.width, H / bg.height)
@@ -77,9 +78,10 @@ def fit_picture(path: str) -> np.ndarray:
     bg = bg.crop(((bg.width - W) // 2, (bg.height - H) // 2, (bg.width - W) // 2 + W, (bg.height - H) // 2 + H))
     bg = bg.filter(ImageFilter.GaussianBlur(28))
     bg = Image.blend(bg, Image.new("RGB", (W, H), (0, 0, 0)), 0.45)
-    s = min(W / im.width, H / im.height)
+    top = 16 if bottom else 0
+    s = min(W / im.width, (H - bottom - top) / im.height)
     fg = im.resize((int(im.width * s), int(im.height * s)), Image.LANCZOS)
-    bg.paste(fg, ((W - fg.width) // 2, (H - fg.height) // 2))
+    bg.paste(fg, ((W - fg.width) // 2, top + (H - bottom - top - fg.height) // 2))
     return np.asarray(bg)
 
 
@@ -126,9 +128,9 @@ class ColorInput(Input):
 class ImageInput(Input):
     kind = "image"
 
-    def __init__(self, iid, src, seconds=None):
+    def __init__(self, iid, src, seconds=None, bottom=0):
         super().__init__(iid, src)
-        self.frame = frame_from_rgb(fit_picture(src))
+        self.frame = frame_from_rgb(fit_picture(src, bottom))
         self.last = self.frame
         self.length = int(round(seconds * FPS)) if seconds else None
 
@@ -460,19 +462,19 @@ class Mixer:
 
     # ---- API (all thread safe)
     @staticmethod
-    def make_input(iid, src, start=0.0, seconds=None, live=False):
+    def make_input(iid, src, start=0.0, seconds=None, live=False, bottom=0):
         ext = os.path.splitext(src)[1].lower()
         if src == "black" or src.startswith("color:"):
             return ColorInput(iid, src)
         if ext in (".jpg", ".jpeg", ".png", ".webp"):
-            return ImageInput(iid, src, seconds)
+            return ImageInput(iid, src, seconds, bottom)
         return FileInput(iid, src, start=start, seconds=seconds, live=live)
 
-    def load(self, src: str, iid: str | None = None, start=0.0, seconds=None, live=False):
+    def load(self, src: str, iid: str | None = None, start=0.0, seconds=None, live=False, bottom=0):
         """Create an input (slow part outside the lock, so the clock never waits), pre-roll starts at once."""
         with self.lock:
             iid = iid or self._new_id("in")
-        inp = self.make_input(iid, src, start, seconds, live)
+        inp = self.make_input(iid, src, start, seconds, live, bottom)
         with self.lock:
             old = self.inputs.get(iid)
             if old and old is not self.program and old is not (self.trans or {}).get("to"):
@@ -673,7 +675,8 @@ class Playlist:
         """Load item i; from the clock (wait=False) in a thread, so the clock never stops for ffprobe/PIL."""
         it = self.items[i]
         self.loaded[i] = f"pl{i}"
-        job = lambda: mx.load(it["src"], iid=f"pl{i}", start=it.get("start", 0), seconds=it.get("seconds"))
+        job = lambda: mx.load(it["src"], iid=f"pl{i}", start=it.get("start", 0), seconds=it.get("seconds"),
+                              bottom=it.get("bottom", 0))
         if wait:
             job()
             return mx.inputs[f"pl{i}"]

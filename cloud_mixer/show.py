@@ -96,7 +96,8 @@ def main():
     for it in items:
         if not os.path.exists(it["src"]):
             say(f"MISSING {it['src']}")
-    m.load(items[0]["src"], id="pl0", start=items[0].get("start", 0), seconds=items[0].get("seconds"))
+    m.load(items[0]["src"], id="pl0", start=items[0].get("start", 0), seconds=items[0].get("seconds"),
+           bottom=items[0].get("bottom", 0))
     say("item 1 pre-rolled")
     sleep_until(T - 60)
     if not a.no_path_check:
