@@ -101,7 +101,7 @@ The CLOUD MIXER is the ONLY publisher on relay path `santoshi`; every viewer get
   ours) → hands off; site live via relay (public GET /api/live?c=hls, every 5 s on air / 10 s off) or a ready cam-* path → on air:
   fallback still (poster-next-2026-11-21.jpg, silence, text "Starting soon") then the encoder; a camera's picture (12 frames queued)
   → 1 s crossfade to it; camera gone 3 s → 1 s fade to the fallback ("Back in a moment"); a newer camera replaces the older; neither
-  for 15 s → fade to black, encoder off (nothing on santoshi). Its own restart adopts the program on air; a daemon restart starts over.
+  for 30 s (on the fallback) → fade to black, encoder off (nothing on santoshi). Its own restart adopts the program on air; a daemon restart starts over.
 - Why no 24/7 output: ~30 % of a core of the 2-core VM all day and a "starting soon" recording on Drive all day; off-air the site shows
   /live/closed/ anyway. Options: `--fallback <jpg>`, `--no-fallback-text`, `--fade`, `--grace`, `--force-live` (tests only).
 - Log: `journalctl -u cloud-mixer-live -f`. Off: `sudo systemctl stop cloud-mixer-live` (the daemon keeps running).
@@ -109,3 +109,20 @@ The CLOUD MIXER is the ONLY publisher on relay path `santoshi`; every viewer get
 
 ## Second replay (15.11.2026): poster overlay
 Started by one-off `systemd-run --unit=cloud-mixer-replay2 ... python3 -m cloud_mixer.show shows/subic-2026-10-17-continuous.json --at <UTC> --path santoshi --site` (show.env untouched). Poster overlay 20 s every 120 s, first at T+60 s. See LESSONS.
+
+### Deployed 15.11.2026 15:22 UTC, and the proofs
+- VM: relay config applied in place (`sudo santoshi-relay/apply-config.sh` from ~/vm-chromium-git; backup /etc/mediamtx/mediamtx.yml.20261115-152235;
+  /etc/santoshi-relay/mixer-key made), cloud-mixer.service restarted for the mixer user, cloud-mixer + cloud-mixer-live ENABLED at boot.
+  Site: live.js mixer only again (897201d, run 43729784583 green), not-live relay block names the Cloudflare door (5c15258).
+- Private test (tools/test-live-route.sh, 15:20 UTC): camera key refused on santoshi; cam-test1 on program 8 s after its path was
+  ready; santoshi HLS h264 1280x720 + aac 48 kHz stereo; poster "Starting soon" before, "Back in a moment" after (pictures and
+  silencedetect: silence 0-32 s and 83-110 s, the 440 Hz tone between); 0 late frames.
+- Real relay (15:26-15:31 UTC, tools/test-camera.sh's pattern on cam-vmtest): camera key refused on santoshi ("failed to
+  authenticate"); ON AIR with the fallback, camera faded in 6 s later; ffprobe of https://relay.ples-duse.org:8888/santoshi and of
+  https://live.santoshiband.org/santoshi: h264 + aac. Found and fixed (8304cf5): a camera that left while the site was not live
+  froze on its last frame for the 15 s grace; now it goes to the fallback after 3 s and the grace (30 s) runs on the fallback.
+- 30 readers on GitHub runners through live.santoshiband.org (15:28-15:29, the test pattern): 0 join failures, stalls 0-0.24 %,
+  3.67 Mbit/s each, 25 fps. 45 readers (15:36-15:37, the Meditation Room on air): 66-71 % stalls, 1.35 Mbit/s each, VM egress
+  pinned at ~54 Mbit/s, and the mixer losing ~7.6 of 25 frames a second (Meditation Room encoder + mixer on 2 cores, load 17).
+  Cloudflare HITs only the same segment URL; another player session has other URLs (MISS), so viewers are not shared yet.
+- Watch it by hand: `tools/test-camera.sh 180` on the VM (a 3-minute test camera; the site's live flag untouched).

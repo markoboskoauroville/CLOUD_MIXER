@@ -56,3 +56,10 @@
 - show.py: show file key `poster_overlay {src, first, every, seconds, fade, bottom}` runs the cycle (first at T+60 s, every 120 s, 20 s). Show file shows/subic-2026-10-17-continuous.json = songs only.
 - Proof on the public HLS: aac + h264, silencedetect (-50 dB, 0.3 s) over 40 s spanning the first poster found no silence.
 - A private relay path needs its own entry in MediaMTX paths AND auth permissions (the public config only lets user santoshi publish santoshi/pixel); easier: tools/test-mediamtx.sh (port 8990 SRT, HLS http://127.0.0.1:8988/<path>/index.m3u8, no auth, no cookie check). Public HLS needs `-tls_verify 0` and gives a 302 cookieCheck first (ffprobe follows it).
+5. **A camera alone can put santoshi on air** (site not live): useful for tests, but when it leaves the program must go to the fallback
+   at once; the off-air grace has to run on the fallback, never on a frozen camera frame (found in the real-relay test, 15.11.2026).
+6. **Two encoders do not fit the 2-core VM**: the Meditation Room (Linux) encoder + its clip decoders beside the mixer drove the load
+   to 17 and the mixer lost 30 % of its frames. A source for the mixer should be the lightest possible (a phone's WHIP, a file), or
+   the VM needs more cores.
+7. **The Cloudflare door does not share viewers yet**: MediaMTX's LL-HLS segment URLs carry a per-session id, so the cache HITs only
+   a repeat of the same URL; 45 readers pinned the VM's egress at ~54 Mbit/s.
