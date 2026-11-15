@@ -209,6 +209,14 @@ class Auto:
             if self.cam not in ids:
                 self.cam, self.cam_on = None, False
             self.started_output = bool(st.get("output"))
+        ids0 = {i["id"] for i in st.get("inputs", [])}
+        if (self.fallback_loaded and "fallback" not in ids0) or (self.cam and self.cam not in ids0):
+            log("the mixer lost our inputs (daemon restarted?): starting over")
+            self.fallback_loaded = "fallback" in ids0
+            if self.cam not in ids0:
+                self.cam, self.cam_on = None, False
+            if not st.get("output"):
+                self.started_output = False
         now = time.time()
         if now >= self.next_site:
             r = True if a.force_live else site_live(a.site)
