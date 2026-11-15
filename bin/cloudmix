@@ -1,0 +1,18 @@
+#!/usr/bin/env python3
+"""cloudmix: the CLOUD MIXER from the shell.  cloudmix status | load <src> [id] | cut <id> | fade <id> [s] |
+text <id> "<text>" [position] | textoff <id> | poster <jpg> [s] | output <relay|relay:path|url> | outstop | stop | site go|stop"""
+import json, os, sys
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.realpath(__file__)), ".."))
+from cloud_mixer.client import Mixer
+m = Mixer(os.environ.get("CLOUDMIX_API", "http://127.0.0.1:8841"))
+a = sys.argv[1:] or ["status"]
+c, r = a[0], a[1:]
+f = {"status": lambda: m.status(), "load": lambda: m.load(r[0], r[1] if len(r) > 1 else None),
+     "cut": lambda: m.cut(r[0]), "fade": lambda: m.fade(r[0], float(r[1]) if len(r) > 1 else 1.5),
+     "text": lambda: m.text_on(r[0], r[1].replace("\\n", "\n"), r[2] if len(r) > 2 else "bottom"),
+     "textoff": lambda: m.text_off(r[0]), "poster": lambda: m.poster(r[0], float(r[1]) if len(r) > 1 else 5),
+     "output": lambda: m.output(r[0] if r else "relay"), "outstop": lambda: m.output_stop(),
+     "stop": lambda: m.stop(), "site": lambda: m.site(r[0])}
+if c not in f:
+    print(__doc__); sys.exit(2)
+print(json.dumps(f[c](), ensure_ascii=False, indent=1))

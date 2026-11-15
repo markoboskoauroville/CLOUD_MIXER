@@ -1,0 +1,17 @@
+[Unit]
+Description=CLOUD MIXER (vMix in the cloud): programmatic vision mixer, API 127.0.0.1/100.102.86.30:8841
+After=network-online.target tailscaled.service santoshi-relay.service
+Wants=network-online.target
+
+[Service]
+User=ubuntu
+WorkingDirectory=/home/ubuntu/cloud-mixer
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/usr/bin/python3 -m cloud_mixer.server --port 8841 --bind 127.0.0.1,100.102.86.30
+Restart=on-failure
+RestartSec=3
+Nice=-5
+CPUWeight=400
+
+[Install]
+WantedBy=multi-user.target
