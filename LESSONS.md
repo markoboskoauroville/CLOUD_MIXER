@@ -40,3 +40,19 @@
 - Deploy waits for an idle mixer: restart only when cloud-mixer-show, meditation-room-linux and mrlinux-live are inactive and /status output is None. Never restart during a show.
 - Cameras publishing WHIP straight to relay path `santoshi` (no KV relay:campath) deliver WebRTC Opus; MediaMTX cannot transcode, so those HLS viewers get Opus. Route cameras through the mixer (campath + live_program) so the public path is always the mixer's AAC.
 - studio-ladder (/usr/local/lib/chromium-vm/studio-ladder) already encodes `-c:a aac -ar 48000`.
+
+## 15.11.2026: mixer only on santoshi
+1. **MediaMTX internal auth, user `any`** matches any user name and any password; an entry with `ips: [127.0.0.1]` is therefore open to
+   every local process, including cloudflared (the HLS tunnel). The only publisher on santoshi gets a user and key of its own.
+2. **Permissions take regex paths** (`path: ~^cam-[a-z0-9]{4,16}$`), and so do path names in `paths:` (quoted key). One rule covers
+   every paired camera; no config change per camera.
+3. **Cameras never wait for the mixer**: the camera's private path is ready the moment WHIP connects; the mixer finds it in MediaMTX's
+   API (/v3/paths/list) and fades when its picture is queued. No call from the site to the VM is needed.
+4. **The live program never touches what it did not start**: a show, a playlist or an encoder started by hand. The replay of 15.11.2026
+   afternoon ran as a hand-started playlist, not as cloud-mixer-show; both count as "a show".
+
+## 15.11.2026: the poster is an overlay, never an item (rule)
+- A poster between songs as a playlist item replaces the program and its sound. Marko: "don't stop the sound. Overlay the image over the stream and sound is going on." Use `image_on` / `image_off` (API /image_on, /image_off, client.image_on): a dark translucent backdrop plus the poster contained in the frame above 170 px kept free for the lower third; fades 1.5 s; audio untouched.
+- show.py: show file key `poster_overlay {src, first, every, seconds, fade, bottom}` runs the cycle (first at T+60 s, every 120 s, 20 s). Show file shows/subic-2026-10-17-continuous.json = songs only.
+- Proof on the public HLS: aac + h264, silencedetect (-50 dB, 0.3 s) over 40 s spanning the first poster found no silence.
+- A private relay path needs its own entry in MediaMTX paths AND auth permissions (the public config only lets user santoshi publish santoshi/pixel); easier: tools/test-mediamtx.sh (port 8990 SRT, HLS http://127.0.0.1:8988/<path>/index.m3u8, no auth, no cookie check). Public HLS needs `-tls_verify 0` and gives a 302 cookieCheck first (ffprobe follows it).

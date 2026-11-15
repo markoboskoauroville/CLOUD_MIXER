@@ -87,3 +87,25 @@ Marko: "until 12:00, this will be a test stream. My live camera and my keyboard 
 
 ## Audio codec rule (15.11.2026)
 Stream audio for HLS viewers is AAC (160k, 48 kHz stereo), set in engine.py Output. Code pushed; deploy to the VM (git pull in ~/cloud-mixer, restart cloud-mixer.service) only when no show is on air. Verify with a private relay path (relay:aactest) and ffprobe on 127.0.0.1:8888/aactest/index.m3u8 (needs aac + h264).
+
+## Mixer only: the live route on santoshi (15.11.2026, Marko: "Yes, mixer only (Recommended)")
+The CLOUD MIXER is the ONLY publisher on relay path `santoshi`; every viewer gets its H.264 + AAC (iPhones), never a phone's Opus.
+- **Camera**: the site's /api/live (GO with via "relay") gives a paired camera the WHIP door of its OWN private path
+  `cam-<first 10 hex of its token hash>` (SANTOSHI_BAND_SITE functions/api/live.js, camPath). KV relay:campath is retired.
+- **MediaMTX** (vm-chromium santoshi-relay/mediamtx.yml.in, applied with `sudo santoshi-relay/apply-config.sh`): user santoshi (the
+  camera key) may publish only on `~^cam-[a-z0-9]{4,16}$` (and the old `pixel`); user **mixer** (own key /etc/santoshi-relay/mixer-key,
+  only its sha256 in the config, ips 127.0.0.1) is the only one allowed to publish on santoshi. Not "any from 127.0.0.1": the HLS tunnel
+  (cloudflared) also comes from 127.0.0.1. server.py publishes santoshi as user mixer when that key file exists.
+- **The program**: `cloud-mixer-live.service` = `python3 -m cloud_mixer.live_program --auto` (Wants cloud-mixer.service), every second:
+  a show running (cloud-mixer-show active, a playlist not done, or a pl* input) → hands off; an encoder started by hand (program not
+  ours) → hands off; site live via relay (public GET /api/live?c=hls, every 5 s on air / 10 s off) or a ready cam-* path → on air:
+  fallback still (poster-next-2026-11-21.jpg, silence, text "Starting soon") then the encoder; a camera's picture (12 frames queued)
+  → 1 s crossfade to it; camera gone 3 s → 1 s fade to the fallback ("Back in a moment"); a newer camera replaces the older; neither
+  for 15 s → fade to black, encoder off (nothing on santoshi). Its own restart adopts the program on air; a daemon restart starts over.
+- Why no 24/7 output: ~30 % of a core of the 2-core VM all day and a "starting soon" recording on Drive all day; off-air the site shows
+  /live/closed/ anyway. Options: `--fallback <jpg>`, `--no-fallback-text`, `--fade`, `--grace`, `--force-live` (tests only).
+- Log: `journalctl -u cloud-mixer-live -f`. Off: `sudo systemctl stop cloud-mixer-live` (the daemon keeps running).
+- Test without the public path: `tools/test-live-route.sh` (private MediaMTX with the same auth on :8990/:8988/:9997, daemon :8851).
+
+## Second replay (15.11.2026): poster overlay
+Started by one-off `systemd-run --unit=cloud-mixer-replay2 ... python3 -m cloud_mixer.show shows/subic-2026-10-17-continuous.json --at <UTC> --path santoshi --site` (show.env untouched). Poster overlay 20 s every 120 s, first at T+60 s. See LESSONS.
