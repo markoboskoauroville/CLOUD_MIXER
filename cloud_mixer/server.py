@@ -32,7 +32,7 @@ from .engine import FPS, Mixer, Playlist
 log = logging.getLogger("cloud_mixer")
 RELAY_KEY = "/etc/santoshi-relay/key"
 # 15.11.2026 "mixer only": MediaMTX lets only user "mixer" (127.0.0.1) publish on santoshi; cameras (user santoshi) only on cam-*
-MIXER_KEY = "/etc/santoshi-relay/mixer-key"
+MIXER_KEY = os.environ.get("CLOUD_MIXER_MIXER_KEY", "/etc/santoshi-relay/mixer-key")   # env: tests
 SITE = "https://santoshi-band.pages.dev/api/live"
 SITE_TOKEN = os.path.expanduser("~/.config/cloud-mixer/site-camera-token")
 MX: Mixer = None  # type: ignore
