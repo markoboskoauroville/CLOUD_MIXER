@@ -69,3 +69,7 @@
    limit is the playlists: ~2,400 per 30 s at 102 viewers, all through santoshi-hls-proxy (77 % of a core) and cloudflared (11 %),
    which with the mixer saturates the 2 cores. The VM's egress counter is not a clean measure: santoshi-rec-upload sends the
    recording to Drive in ~50 Mbit/s bursts all the time.
+9. **After the shared-playlist proxy (vm-chromium c9d3556), 15.11.2026 16:04-16:06**: 102 readers 0 % stalls, 25 fps; 204 readers
+   2.5-5.7 % stalls, 23.6-24.4 fps, 3.6 Mbit/s each, 0 join failures. Proxy: playlist_shared ≈ 99 % of playlists (up to 17,786 per
+   30 s), segment = distinct_segment (25-29 per 30 s), colos EWR FRA MSP PDX SEA SJC. Proxy CPU 12 % (102) and 24 % (204); the
+   mixer lost no frames. The load average still climbed to 16 at 204 viewers: the next thing to look at above ~150 viewers.
