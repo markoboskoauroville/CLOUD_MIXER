@@ -14,3 +14,6 @@
 viewers always get AAC audio (iPhones). A camera that goes live gets its own private path (`cam-<id>`) from /api/live, the mixer
 switches to it with a short fade, shows a fallback picture with silence while no camera is there, and a scheduled show keeps
 precedence. Deadline: well before the concert of 21.11.2026.
+
+## 15.11.2026, Marko (voice, via coordinator), second replay with the poster as overlay
+"Okay, okay, but now just one more round of testing. Please now one more time, play second time the concert. And when you insert the image, the poster, don't stop the sound. Overlay the image over the stream and sound is going on. And that's it."
