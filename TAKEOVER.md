@@ -69,3 +69,18 @@ with via "relay". Revoke it on /admin > LIVE (REVOKE) when not needed.
 A second MediaMTX on 127.0.0.1 only (SRT :8990, LL-HLS :8988, API :9997, record mpegts), config built from the publish
 key without printing it (see LESSONS). Run the show with `--path santoshi-test --port 8990`, then blackdetect,
 silencedetect and frame grabs on the recorded .ts.
+
+## Until noon 15.11.2026: the live camera with text (on air since ~05:31 UTC)
+Marko: "until 12:00, this will be a test stream. My live camera and my keyboard and message over the image."
+- Phone (Manual Camera on the Pixel 7) publishes by WHIP to relay path **pixel**: the site's /api/live gives a camera the
+  WHIP door of KV `relay:campath` (set to "pixel", expires 15.11.2026 13:00 UTC; code in SANTOSHI_BAND_SITE
+  functions/api/live.js). The phone was moved with `adb -s 100.70.23.53:5555 shell am broadcast -a
+  com.mantraproductions.manualcamera.ADB --es cmd live --es v stop`, then `--es v go`. No new app version.
+- MediaMTX: path `pixel` (publish/read for the camera user, read for 127.0.0.1, not recorded).
+- Mixer: `python3 -m cloud_mixer.live_program` (live input `srt://127.0.0.1:8890?streamid=read:pixel`, text "This is a test
+  of live streaming system on Santoshi page." bottom, output santoshi). A live input that drops is read again by itself
+  after 2 s (the picture holds meanwhile).
+- Noon handover (show.py, "own program"): the timer at 10:57 only STARTS the daemon (never restarts it); the show sees its
+  own encoder on air, at 11:59:30 Croatian time fades text and camera to black (2 s), at 11:59:35 unloads the camera, keeps
+  the same encoder (no reconnect), at 11:59:55 site go (no-op), at 12:00:00 the playlist. The Pixel stays on `pixel`,
+  harmless; stop it in the app when convenient.

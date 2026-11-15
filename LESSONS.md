@@ -25,3 +25,11 @@
 12. **Another worker's job shares the CPU**: on 15.11.2026 at 04:52 UTC `studio-ladder` (HLS ladder, user studio) took
     ~110 % of the 2 cores; the dry run still had 0 late frames, but check `top` before a show and ask the owner to stop
     heavy jobs during it.
+13. **A camera into the mixer without a new app**: the phone takes its WHIP door from the site, so the path is moved on the
+    site (KV relay:campath) plus a new MediaMTX path; adding a path and permissions to the live MediaMTX config reloads in
+    place (the running santoshi muxer kept going).
+14. **A timed show must not restart the mixer** when the mixer is already on air: it takes over on the same encoder
+    (fade to black, unload, playlist); a restart would cut the public stream for minutes.
+15. **Live inputs need a supervisor**: a phone reconnect ends the SRT reader; the input reopens itself after 2 s.
+16. **Tests beside a live program**: a second daemon on another port (8851, nice 10, ultrafast, stills only) and the private
+    MediaMTX; the live mixer stayed at 0 late frames, 0 holds.
