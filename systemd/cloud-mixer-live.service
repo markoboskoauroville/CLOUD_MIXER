@@ -1,0 +1,17 @@
+[Unit]
+Description=CLOUD MIXER live program: cameras on private relay paths cam-* -> the mixer -> santoshi (the only publisher there)
+# 15.11.2026, Marko: "mixer only". Pulls the mixer daemon in; a scheduled show (cloud-mixer-show) takes precedence by itself.
+After=network-online.target santoshi-relay.service cloud-mixer.service
+Wants=cloud-mixer.service
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/home/ubuntu/cloud-mixer
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/usr/bin/python3 -m cloud_mixer.live_program --auto
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
