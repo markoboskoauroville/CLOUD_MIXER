@@ -168,6 +168,15 @@ class FileInput(Input):
         self.aq: queue.Queue = queue.Queue(maxsize=qframes * 2)
         self.veof = self.aeof = False
         self.underruns = 0
+        self.restarts = 0
+        self.closed = False
+        self.start = start
+        self._start()
+        if live:          # a camera stream that drops (phone reconnects) is read again by itself
+            threading.Thread(target=self._supervise, daemon=True).start()
+
+    def _start(self):
+        src, live, start = self.src, self.live, self.start
         r, w = os.pipe()
         vf = (f"scale={W}:{H}:force_original_aspect_ratio=decrease,pad={W}:{H}:(ow-iw)/2:(oh-ih)/2,"
               f"fps={FPS},format=yuv420p")
@@ -190,6 +199,23 @@ class FileInput(Input):
         threading.Thread(target=self._read, args=(self.proc.stdout, FB, self.vq, "v"), daemon=True).start()
         threading.Thread(target=self._read, args=(self.afd, AB, self.aq, "a"), daemon=True).start()
         threading.Thread(target=self._errlog, daemon=True).start()
+
+    def _supervise(self):
+        while not self.closed:
+            self.proc.wait()
+            if self.closed:
+                return
+            time.sleep(2)
+            if self.closed:
+                return
+            self.restarts += 1
+            log.warning("live input %s stopped, reading it again (restart %d)", self.id, self.restarts)
+            self.veof = self.aeof = False
+            try:
+                self._start()
+            except Exception as e:
+                log.error("live input %s restart failed: %s", self.id, e)
+                time.sleep(5)
 
     @staticmethod
     def _has_audio(src):
@@ -241,7 +267,7 @@ class FileInput(Input):
 
     def next(self):
         if self.vq.empty():
-            if self.veof:
+            if self.veof and not self.live:
                 self.ended = True
                 return self.last, SILENCE
             self.underruns += 1
@@ -261,6 +287,7 @@ class FileInput(Input):
         return v, a
 
     def close(self):
+        self.closed = True
         try:
             self.proc.kill()
         except Exception:
@@ -273,7 +300,7 @@ class FileInput(Input):
 
     def info(self):
         d = super().info()
-        d.update(queued=self.vq.qsize(), underruns=self.underruns)
+        d.update(queued=self.vq.qsize(), underruns=self.underruns, restarts=self.restarts)
         return d
 
 
