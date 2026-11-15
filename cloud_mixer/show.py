@@ -99,8 +99,24 @@ def main():
     m.load(items[0]["src"], id="pl0", start=items[0].get("start", 0), seconds=items[0].get("seconds"),
            bottom=items[0].get("bottom", 0))
     say("item 1 pre-rolled")
+    st = m.status()
+    own = bool(st.get("output") and st["output"].get("alive") and st["output"]["url"].startswith(f"srt://127.0.0.1:{a.port}"))
+    if own:
+        # 15.11.2026: our own program (the live camera with text) is already on the path: no path check, no new encoder;
+        # at T-30 s the live program fades to black, at T the playlist starts on the same encoder (no reconnect)
+        say("own program on air (" + st["program"]["id"] + "): the show takes over on the same encoder")
+        sleep_until(T - 30)
+        for ov in st.get("overlays", []):
+            m.text_off(ov["id"], fade=2.0)
+        m.fade("black", 2.0)
+        say("live program faded to black (T-30 s)")
+        sleep_until(T - 25)
+        for inp in m.status()["inputs"]:
+            if inp["id"] not in ("black", "pl0"):
+                m.unload(inp["id"])
+                say(f"unloaded {inp['id']}")
     sleep_until(T - 60)
-    if not a.no_path_check:
+    if not a.no_path_check and not own:
         pub = path_publisher(a.path)
         if pub and not pub.startswith("api error"):
             notify(f"CLOUD MIXER: at 11:59 Croatian time the relay path '{a.path}' still has a publisher ({pub}). "
@@ -115,8 +131,9 @@ def main():
         else:
             say(f"path {a.path} is free ({pub or 'no publisher'})")
     sleep_until(T - 8)
-    m.output(f"relay:{a.path}", port=a.port)
-    say("encoder started on black")
+    if not own:
+        m.output(f"relay:{a.path}", port=a.port)
+        say("encoder started on black")
     if a.site:
         sleep_until(T - 5)
         r = m.site("go")
