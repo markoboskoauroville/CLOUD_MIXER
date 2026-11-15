@@ -63,3 +63,9 @@
    the VM needs more cores.
 7. **The Cloudflare door does not share viewers yet**: MediaMTX's LL-HLS segment URLs carry a per-session id, so the cache HITs only
    a repeat of the same URL; 45 readers pinned the VM's egress at ~54 Mbit/s.
+8. **Capacity through live.santoshiband.org after Smart Tiered Cache (15.11.2026 15:53-15:56, test pattern via the mixer)**:
+   45 GitHub-runner readers: 0 % stalls, 25 fps, 3.57 Mbit/s each; 102 readers: ~10.5 % stalls, 22.4 fps, 3.7 Mbit/s each. The proxy
+   fetched every segment ONCE (segment = distinct_segment, 22-30 per 30 s), so the segments no longer cost the VM per viewer. The new
+   limit is the playlists: ~2,400 per 30 s at 102 viewers, all through santoshi-hls-proxy (77 % of a core) and cloudflared (11 %),
+   which with the mixer saturates the 2 cores. The VM's egress counter is not a clean measure: santoshi-rec-upload sends the
+   recording to Drive in ~50 Mbit/s bursts all the time.
