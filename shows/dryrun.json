@@ -1,0 +1,48 @@
+{
+ "title": "dry run",
+ "fade": 1.5,
+ "end_fade": 3.0,
+ "first_fade": 1.0,
+ "items": [
+  {
+   "src": "/srv/cloud-mixer/media/subic/01.mp4",
+   "title": "1. Jai Ganesha Pahi Mam",
+   "start": 120,
+   "seconds": 20,
+   "text": {
+    "id": "lower",
+    "text": "This is a test stream\nRecording of the concert of 17.10.2026 · Češki narodni dom, Zagreb · 1. Jai Ganesha Pahi Mam"
+   }
+  },
+  {
+   "src": "/srv/cloud-mixer/media/subic/poster-next-2026-11-21.jpg",
+   "title": "poster 21.11.2026",
+   "seconds": 8.0,
+   "bottom": 130,
+   "text": {
+    "id": "lower",
+    "text": "See you at the next concert\nSaturday 21.11.2026 · 19:00 · Češki narodni dom, Pavla Šubića 20, Zagreb"
+   }
+  },
+  {
+   "src": "/srv/cloud-mixer/media/subic/02.mp4",
+   "title": "2. Ambe Jagadambe",
+   "start": 120,
+   "seconds": 20,
+   "text": {
+    "id": "lower",
+    "text": "This is a test stream\nRecording of the concert of 17.10.2026 · Češki narodni dom, Zagreb · 2. Ambe Jagadambe"
+   }
+  },
+  {
+   "src": "/srv/cloud-mixer/media/subic/poster-next-2026-11-21.jpg",
+   "title": "poster 21.11.2026",
+   "seconds": 10.0,
+   "bottom": 130,
+   "text": {
+    "id": "lower",
+    "text": "See you at the next concert\nSaturday 21.11.2026 · 19:00 · Češki narodni dom, Pavla Šubića 20, Zagreb"
+   }
+  }
+ ]
+}
