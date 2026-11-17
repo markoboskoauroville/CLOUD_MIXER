@@ -126,3 +126,7 @@ Started by one-off `systemd-run --unit=cloud-mixer-replay2 ... python3 -m cloud_
   pinned at ~54 Mbit/s, and the mixer losing ~7.6 of 25 frames a second (Meditation Room encoder + mixer on 2 cores, load 17).
   Cloudflare HITs only the same segment URL; another player session has other URLs (MISS), so viewers are not shared yet.
 - Watch it by hand: `tools/test-camera.sh 180` on the VM (a 3-minute test camera; the site's live flag untouched).
+
+## 17.11.2026: santoshiband.org given up
+Marko gave up the domain; live.santoshiband.org (the cached HLS door used in the tests above) is gone and its tunnel stopped on chromium-vm.
+Viewers read HLS from the relay's own door again (relay hostname under ples-duse.org, :8888), about 12 viewers direct (vm-chromium TAKEOVER).
