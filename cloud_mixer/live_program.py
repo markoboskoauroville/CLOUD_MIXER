@@ -32,7 +32,7 @@ import urllib.request
 from .client import Mixer
 
 FALLBACK = "/srv/cloud-mixer/media/subic/poster-next-2026-11-21.jpg"
-SITE = "https://santoshi-band.pages.dev/api/live?c=hls"
+SITE = "https://santoshi.markobosko.org/api/live?c=hls"
 TXT_ID = "fallback"
 CAM_PREFIX = "cam-"
 
